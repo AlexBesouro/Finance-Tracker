@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     database_username: str
     database_name: str
     database_port: str
+
+    secret_key: str
+    algorithm: str
+    expire_time:int
     class Config:
         env_file = ".env_example"
 
