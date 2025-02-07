@@ -16,12 +16,14 @@ def test_add_expenses(authorized_client, test_user, amount, category, status_cod
     assert res.status_code == status_code
 
 
-def test_add_income_unauthorized(client):
+def test_add_expenses_unauthorized(client):
     res = client.post("/expenses", json={"amount": 500, "category": "other"})
     assert res.status_code == 401
 
-def test_add_income_nonexistent_user(authorized_client, session, test_user):
+def test_add_expenses_nonexistent_user(authorized_client, session, test_user):
     session.query(models.User).delete()
     session.commit()
     res = authorized_client.post("/expenses", json={"expenses": 1200, "category": "other"})
     assert res.status_code == 404
+
+

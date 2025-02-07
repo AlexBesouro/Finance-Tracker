@@ -1,6 +1,9 @@
 from datetime import date, datetime
+from typing import List, Literal
+
 from pydantic import BaseModel, EmailStr
 from typing_extensions import Optional
+from enum import Enum as PyEnum
 
 
 class TokenResponse(BaseModel):
@@ -44,3 +47,14 @@ class IncomeResponse(BaseModel):
     category: str
     added_at: date
 
+
+class Category(BaseModel):
+    category: str
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+
+class ExpenseCategorySummary(BaseModel):
+    category: str
+    total_amount: float
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
