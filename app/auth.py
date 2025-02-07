@@ -1,7 +1,5 @@
 import jwt
 from datetime import datetime, timedelta, timezone
-from typing import Optional
-
 from sqlalchemy.orm import Session
 
 from app import models
@@ -37,8 +35,7 @@ def get_current_user(token: str = Security(oauth2_schema), db: Session = Depends
     if not payload:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
     user = db.query(models.User).filter(models.User.email == payload["user_email"]).first()
-    print(user)
     if not user:
-        raise HTTPException(status_code=401, detail="User not found")
-    print(user.__dict__)
+        raise HTTPException(status_code=404, detail="User not found")
+    # print(user.__dict__)
     return user

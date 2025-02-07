@@ -17,7 +17,6 @@ class CreateUser(BaseModel):
     first_name: str
     last_name: str
     current_job: str
-    month_salary: float
     gender: Optional[str] = None
     user_birthday: Optional[date] = None
 
@@ -27,7 +26,6 @@ class UserResponse(BaseModel):
     first_name: str
     last_name: str
     current_job: str
-    month_salary: float
     gender: Optional[str] = None
     user_birthday: Optional[date] = None
     user_created_at: datetime
@@ -35,11 +33,14 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class UpdateUser(BaseModel):
-    email: EmailStr
-    first_name: str
-    last_name: str
-    current_job: str
-    month_salary: float
-    gender: Optional[str] = None
-    user_birthday: Optional[date] = None
+class Income(BaseModel):
+    amount: float
+    category: str
+
+class IncomeResponse(BaseModel):
+    id: int
+    user_id: int
+    amount: float
+    category: str
+    added_at: date
+
