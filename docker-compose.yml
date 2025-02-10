@@ -1,0 +1,40 @@
+services:
+  fastapi:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+
+    ports:
+      - 8000:8000
+
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=postgres
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+#      target: runner
+    command: sh -c "alembic upgrade head"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  data:
