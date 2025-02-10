@@ -56,5 +56,5 @@ class Category(BaseModel):
 class ExpenseCategorySummary(BaseModel):
     category: str
     total_amount: float
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
+    start_date: date
+    end_date: date

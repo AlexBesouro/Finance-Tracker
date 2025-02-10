@@ -27,9 +27,11 @@ def add_expenses(expenses:schemas.Income, db: Session = Depends(get_db),
     return new_expenses
 
 @router.get("/", response_model=schemas.ExpenseCategorySummary)
-def get_expenses_by_category(category_name: schemas.Category,  db: Session = Depends(get_db),
+def get_expenses_by_category(category_name: schemas.Category = Depends(),  db: Session = Depends(get_db),
                              current_user: models.User = Depends(auth.get_current_user)):
-    expenses_by_category = (db.query(models.Expenses.category, func.sum(models.Expenses.amount).label("total_amount"))
+    expenses_by_category = (db.query(models.Expenses.category, func.sum(models.Expenses.amount).label("total_amount"),
+                                                               func.min(models.Expenses.added_at).label("start_date"),
+                                                               func.max(models.Expenses.added_at).label("end_date"))
                             .filter(models.Expenses.user_id == current_user.user_id)
                             .filter(models.Expenses.category == category_name.category))
     if category_name.start_date:
@@ -37,15 +39,17 @@ def get_expenses_by_category(category_name: schemas.Category,  db: Session = Dep
     if category_name.end_date:
         expenses_by_category = expenses_by_category.filter(models.Expenses.added_at <= category_name.end_date)
     expenses_by_category = expenses_by_category.group_by(models.Expenses.category).first()
+    print(expenses_by_category)
 
     if not expenses_by_category:
         raise HTTPException(status_code=404, detail="No expenses found")
-    print(expenses_by_category)
-    return expenses_by_category
+    return {
+        "category": expenses_by_category.category,
+        "total_amount": expenses_by_category.total_amount,
+        "start_date": expenses_by_category.start_date,
+        "end_date": expenses_by_category.end_date}
 
-
-
-# Graph try
+                    # Graph try
 @router.get("/graph", response_class=Response)
 def get_expenses_graph(category_name: schemas.Category,
                        db: Session = Depends(get_db),

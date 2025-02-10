@@ -60,3 +60,12 @@ def authorized_client(client, test_user):
     token = auth.create_access_token(data={"user_email": test_user["email"]})
     client.headers.update({"Authorization": f"Bearer {token}"})
     return client
+
+@pytest.fixture
+def test_expenses(authorized_client, test_user):
+    mock_expenses = {"amount": 1000,
+                 "category": "housing"}
+    res = authorized_client.post('/expenses', json=mock_expenses)
+    res = res.json()
+    # res["password"] = mock_user["password"] # Adding password to an answer from DB
+    return res
