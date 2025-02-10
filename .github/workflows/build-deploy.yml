@@ -50,8 +50,8 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{secrets.DOCKER_HUB_USERNAME}}
-          password: ${{secrets.DOCKER_HUB_ACCESS_TOKEN}}
+          username: aleksbesouro
+          password: dckr_pat_yK0ShU4zmLSxNcRxxd-oOZGufW8
 
       - name: Check Docker Login
         run: docker info  # Check Docker login success
@@ -70,7 +70,7 @@ jobs:
             context: ./
             file: ./Dockerfile
             push: true
-            tags: ${{secrets.DOCKER_HUB_USERNAME}}/finance_tracker:latest
+            tags: aleksbesouro/finance_tracker:latest
 
       - name: Check Docker Configuration
         run: cat ~/.docker/config.json  # Debug credentials storage
