@@ -1,23 +1,30 @@
 name: Build and Deploy Code
 on: [push, pull_request]
-
+#  push:
+#    branches:
+#      - "main"
+#  pull_request:
+#    branches:
+#      - "test_branch"
 jobs:
   job1:
+#    environment:
+#      name: testing
     env:
-      DATABASE_HOSTNAME: ${{secrets.DATABASE_HOSTNAME}}
-      DATABASE_PORT: ${{secrets.DATABASE_PORT}}
-      DATABASE_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
-      DATABASE_NAME: ${{secrets.DATABASE_NAME}}
-      DATABASE_USERNAME: ${{secrets.DATABASE_USERNAME}}
-      SECRET_KEY: ${{secrets.SECRET_KEY}}
-      ALGORITHM: ${{secrets.ALGORITHM}}
-      ACCESS_TOKEN_EXPIRE_MINUTES: 160
+      DATABASE_HOSTNAME: ${{ secrets.DATABASE_HOSTNAME }}
+      DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+      DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ALGORITHM: ${{ secrets.ALGORITHM }}
+      EXPIRE_TIME: 160
     services:
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
-          POSTGRES_DB: ${{secrets.DATABASE_NAME}}_test
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}_test
         ports:
           - 5432:5432
         options: >-
@@ -27,21 +34,17 @@ jobs:
           --health-retries 5
     runs-on: ubuntu-latest
     steps:
-      - name: Pull Git repo
+      - name: pulling git repo
         uses: actions/checkout@v4
-
-      - name: Set up Python
+      - name: setup python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Update pip
+      - name: update pip
         run: python -m pip install --upgrade pip
-
-      - name: Install dependencies
+      - name: install dependencies
         run: pip install -r requirements.txt
-
-      - name: Test with pytest
+      - name: test with pytest
         run: |
           pip install pytest
           pip install httpx
@@ -50,18 +53,11 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: aleksbesouro
-          password: dckr_pat_yK0ShU4zmLSxNcRxxd-oOZGufW8
-
-      - name: Check Docker Login
-        run: docker info  # Check Docker login success
-
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Check Buildx Version
-        run: docker buildx version  # Debug Buildx availability
 
       - name: Build and push Docker image
         id: build-and-push
@@ -69,8 +65,8 @@ jobs:
         with:
             context: ./
             file: ./Dockerfile
-            push: true
-            tags: aleksbesouro/finance_tracker:latest
-
-      - name: Check Docker Configuration
-        run: cat ~/.docker/config.json  # Debug credentials storage
+            builder: ${{ steps.buildx.outputs.name }}
+            push: True
+            tags: ${{ secrets.DOCKER_HUB_USERNAME }}/finance_tracker:latest
+            cache-from: type=local,src=/tmp/.buildx-cache
+            cache-to: type=local,dest=/tmp/.buildx-cache
