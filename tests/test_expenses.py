@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 from app import models
 
@@ -28,14 +30,15 @@ def test_add_expenses_nonexistent_user(authorized_client, session, test_user):
 
 
 def test_expenses_by_category(test_expenses, authorized_client, session, test_user):
+    today_str = date.today().isoformat()
     response = authorized_client.get("/expenses", params={"category" : "housing",
-                                                          "start_date": "2025-02-10",
-                                                          "end_date": "2025-02-10"})
+                                                          "start_date": today_str,
+                                                          "end_date": today_str})
     assert response.status_code == 200
     assert response.json() == {
         "category": "housing",
         "total_amount": 1000,
-        "start_date": "2025-02-10",
-        "end_date": "2025-02-10"
+        "start_date": today_str,
+        "end_date": today_str
     }
 
