@@ -1,15 +1,8 @@
 name: Build and Deploy Code
 on: [push, pull_request]
-#  push:
-#    branches:
-#      - "main"
-#  pull_request:
-#    branches:
-#      - "test_branch"
+
 jobs:
   job1:
-#    environment:
-#      name: testing
     env:
       DATABASE_HOSTNAME: ${{ secrets.DATABASE_HOSTNAME }}
       DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
@@ -18,7 +11,7 @@ jobs:
       DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       ALGORITHM: ${{ secrets.ALGORITHM }}
-      EXPIRE_TIME: 160
+      EXPIRE_TIME: ${{ secrets.EXPIRE_TIME }}
     services:
       postgres:
         image: postgres
@@ -60,10 +53,12 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
-        id: build-and-push
+        id: docker_build
         uses: docker/build-push-action@v6
         with:
             context: ./
             file: ./Dockerfile
             push: true
-            tags: ${{ secrets.DOCKER_HUB_USERNAME }}/finance_tracker:latest
+            tags: ${{ secrets.DOCKER_HUB_USERNAME }}/finance:latest
+            cache-from: type=local,src=/tmp/.buildx-cache
+            cache-to: type=local,dest=/tmp/.buildx-cache
